@@ -138,11 +138,10 @@ public class Hand {
         }
     }
 
-// Исправить ошибку: Royal Flush не работает, если карты Flush совпадают
-// с картами такого же номинала, но другие по масти
     public void checkForStraight(Player player, boolean isAceEqualsZero) {
         List<Card> currentCards = joinTableAndPlayerCards(player);
         currentCards.sort(Comparator.comparing(Card::getNumber));
+        currentCards.sort(Comparator.comparing(Card::getSuit));
         List<Card> combination = new ArrayList<>();
         int cardSequence = 1;
         for (int i = 0; i < currentCards.size() - 1; i++) {
@@ -167,8 +166,7 @@ public class Hand {
                 isAceEqualsZero = true;
             }
         }
-        if ((player.getCombination() == null || (player.getCombination().equals("Flush") &&
-                !player.getCombination().equals("Royal Flush"))) && !isAceEqualsZero) {
+        if ((player.getCombination() == null || (player.getCombination().equals("Flush"))) && !isAceEqualsZero) {
             currentCards.stream().filter(c -> c.getNumber() == 13).forEach(c -> c.setNumber(0));
             checkForStraight(player, true);
         }
@@ -181,12 +179,17 @@ public class Hand {
         for (int i = 0; i < currentCards.size() - 1; i++) {
             if (currentCards.get(i).getSuit().equals(currentCards.get(i + 1).getSuit())) {
                 cardSequence++;
+
             } else {
                 cardSequence = 1;
             }
-            if (cardSequence == 5) {
+            if (cardSequence >= 5) {
                 player.setCombination("Flush");
-                checkForStraight(player, false);
+                String finalSuit = currentCards.get(i).getSuit();
+                currentCards.stream()
+                        .filter(a -> a.getSuit().equals(finalSuit))
+                        .max(Comparator.comparing(Card::getNumber))
+                        .ifPresent(player::setHighCard);
             }
         }
     }
@@ -218,22 +221,6 @@ public class Hand {
             if (winnerRate < player.getCombinationRate()) {
                 winnerRate = player.getCombinationRate();
                 winner = player;
-//                getStraightHighCard();
-            }
-        }
-    }
-
-    // ???
-    public void getStraightHighCard() {
-        Player winner = new Player();
-        winner.setHighCard(new Card(-1, ""));
-        for (Player player : players) {
-            if ((player.getCombination().equals("Straight") || player.getCombination().equals("Straight Flush")) &&
-                    winner.getHighCard().getNumber() < player.getHighCard().getNumber()) {
-                winner = player;
-            }
-            if (this.winner.getCombination() == null) {
-                this.winner = winner;
             }
         }
     }

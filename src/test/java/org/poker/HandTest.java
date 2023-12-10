@@ -69,7 +69,7 @@ public class HandTest extends TestCase {
         Card card4 = new Card(12, "Spades");
         Card card5 = new Card(8, "Spades");
         Card card6 = new Card(12, "Clubs");
-        Card card7 = new Card(8, "Clubs");
+        Card card7 = new Card(13, "Clubs");
 
 
         player1.setCards(new Card[]{card1, card2});
@@ -83,18 +83,20 @@ public class HandTest extends TestCase {
 
         hand.checkForStraight(player1, false);
 
+
         assertEquals("Straight", player1.getCombination());
+        assertEquals(13, player1.getHighCard().getNumber());
     }
 
     public void testCheckForStraightFlush() {
         player1 = new Player();
         cardsOnTheTable = new ArrayList<>();
 
-        Card card1 = new Card(9, "Clubs");
-        Card card2 = new Card(10,  "Clubs");
-        Card card3 = new Card(11, "Clubs");
-        Card card4 = new Card(12, "Clubs");
-        Card card5 = new Card(8, "Clubs");
+        Card card1 = new Card(1, "Clubs");
+        Card card2 = new Card(2,  "Clubs");
+        Card card3 = new Card(3, "Clubs");
+        Card card4 = new Card(4, "Clubs");
+        Card card5 = new Card(13, "Clubs");
         Card card6 = new Card(12, "Diamonds");
         Card card7 = new Card(8, "Spades");
 
@@ -111,6 +113,7 @@ public class HandTest extends TestCase {
         hand.checkForStraight(player1, false);
 
         assertEquals("Straight Flush", player1.getCombination());
+        assertEquals(4, player1.getHighCard().getNumber());
     }
 
     public void testCheckForRoyalFlush() {
@@ -122,15 +125,16 @@ public class HandTest extends TestCase {
         Card card3 = new Card(11, "Clubs");
         Card card4 = new Card(12, "Clubs");
         Card card5 = new Card(13, "Clubs");
-//        Card card6 = new Card(12, "Hearts");
-//        Card card7 = new Card(13, "Diamonds");
+        Card card6 = new Card(12, "Hearts");
+        Card card7 = new Card(13, "Diamonds");
 
         player1.setCards(new Card[]{card1, card2});
+
         cardsOnTheTable.add(card3);
         cardsOnTheTable.add(card4);
         cardsOnTheTable.add(card5);
-//        cardsOnTheTable.add(card6);
-//        cardsOnTheTable.add(card7);
+        cardsOnTheTable.add(card6);
+        cardsOnTheTable.add(card7);
 
         hand.setCardsOnTheTable(cardsOnTheTable);
 
@@ -148,8 +152,8 @@ public class HandTest extends TestCase {
         Card card3 = new Card(8, "Clubs");
         Card card4 = new Card(9, "Clubs");
         Card card5 = new Card(2, "Clubs");
-        Card card6 = new Card(9, "Hearts");
-        Card card7 = new Card(2, "Diamonds");
+        Card card6 = new Card(10, "Clubs");
+        Card card7 = new Card(13, "Clubs");
 
         player1.setCards(new Card[]{card1, card2});
         cardsOnTheTable.add(card3);
@@ -163,6 +167,7 @@ public class HandTest extends TestCase {
         hand.checkForFlush(player1);
 
         assertEquals("Flush", player1.getCombination());
+        assertEquals(13, player1.getHighCard().getNumber());
     }
 
     public void testFindHighCard() {

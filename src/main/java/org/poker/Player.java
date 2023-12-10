@@ -1,5 +1,7 @@
 package org.poker;
 
+import java.util.List;
+
 public class Player {
     private String name;
     private Card [] cards;
@@ -7,6 +9,7 @@ public class Player {
     private boolean isPlaying;
     private Card highCard;
     private int combinationRate;
+    private List<Card> combinationCards;
     public Player() {
         cards = new Card[2];
     }
@@ -53,5 +56,13 @@ public class Player {
 
     public void setHighCard(Card highCard) {
         this.highCard = highCard;
+    }
+
+    public List<Card> getCombinationCards() {
+        return combinationCards;
+    }
+
+    public void setCombinationCards(List<Card> combinationCards) {
+        this.combinationCards = combinationCards;
     }
 }
