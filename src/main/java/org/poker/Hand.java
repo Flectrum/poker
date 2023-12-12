@@ -12,6 +12,7 @@ public class Hand {
         this.players = players;
         deck = new Deck();
         cardsOnTheTable = new ArrayList<>();
+        winner = new Player();
     }
 
     public Deck getDeck() {
@@ -140,31 +141,31 @@ public class Hand {
 
     public void checkForStraight(Player player, boolean isAceEqualsZero) {
         List<Card> currentCards = joinTableAndPlayerCards(player);
+//        currentCards.sort(Comparator.comparing(Card::getSuit));
         currentCards.sort(Comparator.comparing(Card::getNumber));
-        currentCards.sort(Comparator.comparing(Card::getSuit));
         List<Card> combination = new ArrayList<>();
         int cardSequence = 1;
         for (int i = 0; i < currentCards.size() - 1; i++) {
             if (currentCards.get(i).getNumber() + 1 == currentCards.get(i + 1).getNumber()) {
                 cardSequence++;
                 combination.add(currentCards.get(i + 1));
-            } else {
+            } else if (cardSequence < 5 && currentCards.get(i).getNumber() != currentCards.get(i + 1).getNumber()) {
                 cardSequence = 1;
                 combination = new ArrayList<>();
             }
-            if (cardSequence >= 5) {
-                if (player.getCombination() != null && player.getCombination().equals("Flush")) {
-                    player.setCombination("Straight Flush");
-                    if (combination.get(combination.size() - 1).getNumber() == 13) {
-                        player.setCombination("Royal Flush");
-                    }
-                } else if (player.getCombination() == null || (!player.getCombination().equals("Straight Flush")
-                        && !player.getCombination().equals("Royal Flush"))) {
-                    player.setCombination("Straight");
+        }
+        if (cardSequence >= 5) {
+            if (player.getCombination() != null && player.getCombination().equals("Flush")) {
+                player.setCombination("Straight Flush");
+                if (player.getHighCard().getNumber() == 13) {
+                    player.setCombination("Royal Flush");
                 }
-                player.setHighCard(combination.get(combination.size() - 1));
-                isAceEqualsZero = true;
+            } else if (player.getCombination() == null || (!player.getCombination().equals("Straight Flush")
+                    && !player.getCombination().equals("Royal Flush"))) {
+                player.setCombination("Straight");
             }
+            player.setHighCard(combination.get(combination.size() - 1));
+            isAceEqualsZero = true;
         }
         if ((player.getCombination() == null || (player.getCombination().equals("Flush"))) && !isAceEqualsZero) {
             currentCards.stream().filter(c -> c.getNumber() == 13).forEach(c -> c.setNumber(0));
@@ -204,7 +205,7 @@ public class Hand {
     }
 
     public void comparePlayersCombinations() {
-        int winnerRate = 0;
+        Player currentWinner = null;
         for (Player player : players) {
             switch (player.getCombination()) {
                 case "High Card" -> player.setCombinationRate(1);
@@ -218,11 +219,15 @@ public class Hand {
                 case "Straight Flush" -> player.setCombinationRate(9);
                 case "Royal Flush" -> player.setCombinationRate(10);
             }
-            if (winnerRate < player.getCombinationRate()) {
-                winnerRate = player.getCombinationRate();
-                winner = player;
+            if (currentWinner == null || (currentWinner.getCombinationRate() < player.getCombinationRate())) {
+                currentWinner = player;
+            } else if (currentWinner.getCombinationRate() == player.getCombinationRate()) {
+                if (currentWinner.getHighCard().getNumber() < player.getHighCard().getNumber()) {
+                    currentWinner = player;
+                }
             }
         }
+        winner = currentWinner;
     }
 }
 
