@@ -7,6 +7,7 @@ public class Hand {
     private final List<Player> players;
     private final Deck deck;
     private List<Card> cardsOnTheTable;
+    String finalSuitIfFlush;
 
     public Hand(List<Player> players) {
         this.players = players;
@@ -186,9 +187,9 @@ public class Hand {
             }
             if (cardSequence >= 5) {
                 player.setCombination("Flush");
-                String finalSuit = currentCards.get(i).getSuit();
+                finalSuitIfFlush = currentCards.get(i).getSuit();
                 currentCards.stream()
-                        .filter(a -> a.getSuit().equals(finalSuit))
+                        .filter(a -> a.getSuit().equals(finalSuitIfFlush))
                         .max(Comparator.comparing(Card::getNumber))
                         .ifPresent(player::setHighCard);
             }
@@ -206,28 +207,51 @@ public class Hand {
 
     public void comparePlayersCombinations() {
         Player currentWinner = null;
+        Card highestCardinPlayerHand = null;
         for (Player player : players) {
             switch (player.getCombination()) {
-                case "High Card" -> player.setCombinationRate(1);
-                case "Pair" -> player.setCombinationRate(2);
-                case "Two Pairs" -> player.setCombinationRate(3);
-                case "Three of Kind" -> player.setCombinationRate(4);
+                case "High Card" -> player.setCombinationRate(1); //
+                case "Pair" -> player.setCombinationRate(2); //
+                case "Two Pairs" -> player.setCombinationRate(3); //
+                case "Three of Kind" -> player.setCombinationRate(4); //
                 case "Straight" -> player.setCombinationRate(5);
-                case "Flush" -> player.setCombinationRate(6);
+                case "Flush" -> player.setCombinationRate(6); //
                 case "Full House" -> player.setCombinationRate(7);
-                case "Four of Kind" -> player.setCombinationRate(8);
+                case "Four of Kind" -> player.setCombinationRate(8); //
                 case "Straight Flush" -> player.setCombinationRate(9);
                 case "Royal Flush" -> player.setCombinationRate(10);
             }
             if (currentWinner == null || (currentWinner.getCombinationRate() < player.getCombinationRate())) {
                 currentWinner = player;
+                if(player.getCombinationRate() == 6 || highestCardinPlayerHand == null){
+                    highestCardinPlayerHand = findHighestCardInPlayerHand(player, finalSuitIfFlush);
+                }
             } else if (currentWinner.getCombinationRate() == player.getCombinationRate()) {
-                if (currentWinner.getHighCard().getNumber() < player.getHighCard().getNumber()) {
+                if (currentWinner.getHighCard().getNumber() < player.getHighCard().getNumber() &&
+                        (player.getCombinationRate() == 9 || player.getCombinationRate() == 5)) {
                     currentWinner = player;
+                } else if((currentWinner.getHighCard().getNumber() == player.getHighCard().getNumber()) &&
+                        player.getCombinationRate() == 6) {
+                    Card tempHighestCardinPlayerHand = findHighestCardInPlayerHand(player, finalSuitIfFlush);
+                    if(highestCardinPlayerHand.getNumber() < tempHighestCardinPlayerHand.getNumber()){
+                        highestCardinPlayerHand = tempHighestCardinPlayerHand;
+                        currentWinner = player;
+                    }
                 }
             }
         }
         winner = currentWinner;
+    }
+
+    private Card findHighestCardInPlayerHand(Player player,String finalSuit) {
+        Card [] cards = player.getCards();
+        Card cardToReturn = new Card(-1, finalSuit);
+        for (Card card : cards) {
+            if (card.getSuit().equals(cardToReturn.getSuit()) && cardToReturn.getNumber() < card.getNumber()) {
+                cardToReturn = card;
+            }
+        }
+        return cardToReturn;
     }
 }
 
