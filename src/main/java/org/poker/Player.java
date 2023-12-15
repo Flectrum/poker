@@ -1,5 +1,6 @@
 package org.poker;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Player {
@@ -12,6 +13,7 @@ public class Player {
     private List<Card> combinationCards;
     public Player() {
         cards = new Card[2];
+        combinationCards = new ArrayList<>();
     }
     public String getName() {
         return name;

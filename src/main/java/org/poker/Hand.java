@@ -1,19 +1,22 @@
 package org.poker;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Hand {
     private Player winner;
     private final List<Player> players;
     private final Deck deck;
     private List<Card> cardsOnTheTable;
-    String finalSuitIfFlush;
+    private boolean isSplit;
+//    String finalSuitIfFlush;
 
     public Hand(List<Player> players) {
         this.players = players;
         deck = new Deck();
         cardsOnTheTable = new ArrayList<>();
         winner = new Player();
+        isSplit = false;
     }
 
     public Deck getDeck() {
@@ -30,6 +33,10 @@ public class Hand {
 
     public Player getWinner() {
         return winner;
+    }
+
+    public boolean isSplit() {
+        return isSplit;
     }
 
     public void init() {
@@ -100,6 +107,7 @@ public class Hand {
     public void checkForXOfKindCombination(Player player) {
         List<Card> currentCards = joinTableAndPlayerCards(player);
         Map<Integer, Integer> xOfKind = new HashMap<>();
+        List<Card> combination = new ArrayList<>();
         for (Card card : currentCards) {
             if (xOfKind.containsKey(card.getNumber())) {
                 xOfKind.put(card.getNumber(), xOfKind.get(card.getNumber()) + 1);
@@ -111,13 +119,22 @@ public class Hand {
         for (Map.Entry<Integer, Integer> entry : xOfKind.entrySet()) {
             if (entry.getValue() == 4) {
                 player.setCombination("Four of Kind");
+                combination = currentCards.stream().filter(a -> a.getNumber() == entry.getKey())
+                        .collect(Collectors.toList());
+                player.setCombinationCards(combination);
+                break;
             } else if (entry.getValue() == 3) {
                 player.setCombination("Three of Kind");
                 cardNumberToRemove = entry.getKey();
+                combination = currentCards.stream().filter(a -> a.getNumber() == entry.getKey())
+                        .collect(Collectors.toList());
             } else if (entry.getValue() == 2) {
                 player.setCombination("Pair");
                 cardNumberToRemove = entry.getKey();
+                combination = currentCards.stream().filter(a -> a.getNumber() == entry.getKey())
+                        .collect(Collectors.toList());
             }
+            player.setCombinationCards(combination);
         }
         if (cardNumberToRemove != -1) {
             xOfKind.remove(cardNumberToRemove);
@@ -142,9 +159,9 @@ public class Hand {
 
     public void checkForStraight(Player player, boolean isAceEqualsZero) {
         List<Card> currentCards = joinTableAndPlayerCards(player);
-//        currentCards.sort(Comparator.comparing(Card::getSuit));
         currentCards.sort(Comparator.comparing(Card::getNumber));
         List<Card> combination = new ArrayList<>();
+        combination.add(currentCards.get(0));
         int cardSequence = 1;
         for (int i = 0; i < currentCards.size() - 1; i++) {
             if (currentCards.get(i).getNumber() + 1 == currentCards.get(i + 1).getNumber()) {
@@ -158,14 +175,16 @@ public class Hand {
         if (cardSequence >= 5) {
             if (player.getCombination() != null && player.getCombination().equals("Flush")) {
                 player.setCombination("Straight Flush");
-                if (player.getHighCard().getNumber() == 13) {
+                System.out.println(combination.size());
+                if (combination.get(combination.size() - 1).getNumber() == 13) {
                     player.setCombination("Royal Flush");
                 }
             } else if (player.getCombination() == null || (!player.getCombination().equals("Straight Flush")
                     && !player.getCombination().equals("Royal Flush"))) {
                 player.setCombination("Straight");
             }
-            player.setHighCard(combination.get(combination.size() - 1));
+//            player.setHighCard(combination.get(combination.size() - 1));
+            player.setCombinationCards(combination);
             isAceEqualsZero = true;
         }
         if ((player.getCombination() == null || (player.getCombination().equals("Flush"))) && !isAceEqualsZero) {
@@ -178,20 +197,25 @@ public class Hand {
         List<Card> currentCards = joinTableAndPlayerCards(player);
         int cardSequence = 1;
         currentCards.sort(Comparator.comparing(Card::getSuit));
+        List<Card> combination = new ArrayList<>();
+        combination.add(currentCards.get(0));
         for (int i = 0; i < currentCards.size() - 1; i++) {
             if (currentCards.get(i).getSuit().equals(currentCards.get(i + 1).getSuit())) {
                 cardSequence++;
+                combination.add(currentCards.get(i + 1));
 
             } else {
                 cardSequence = 1;
+                combination = new ArrayList<>();
             }
             if (cardSequence >= 5) {
                 player.setCombination("Flush");
-                finalSuitIfFlush = currentCards.get(i).getSuit();
-                currentCards.stream()
-                        .filter(a -> a.getSuit().equals(finalSuitIfFlush))
-                        .max(Comparator.comparing(Card::getNumber))
-                        .ifPresent(player::setHighCard);
+//                finalSuitIfFlush = currentCards.get(i).getSuit();
+//                currentCards.stream()
+//                        .filter(a -> a.getSuit().equals(finalSuitIfFlush))
+//                        .max(Comparator.comparing(Card::getNumber))
+//                        .ifPresent(player::setHighCard);
+                player.setCombinationCards(combination);
             }
         }
     }
@@ -206,8 +230,8 @@ public class Hand {
     }
 
     public void comparePlayersCombinations() {
-        Player currentWinner = null;
-        Card highestCardinPlayerHand = null;
+//        Player currentWinner = null;
+//        Card highestCardinPlayerHand = null;
         for (Player player : players) {
             switch (player.getCombination()) {
                 case "High Card" -> player.setCombinationRate(1); //
@@ -215,43 +239,96 @@ public class Hand {
                 case "Two Pairs" -> player.setCombinationRate(3); //
                 case "Three of Kind" -> player.setCombinationRate(4); //
                 case "Straight" -> player.setCombinationRate(5);
-                case "Flush" -> player.setCombinationRate(6); //
+                case "Flush" -> player.setCombinationRate(6);
                 case "Full House" -> player.setCombinationRate(7);
                 case "Four of Kind" -> player.setCombinationRate(8); //
                 case "Straight Flush" -> player.setCombinationRate(9);
                 case "Royal Flush" -> player.setCombinationRate(10);
             }
-            if (currentWinner == null || (currentWinner.getCombinationRate() < player.getCombinationRate())) {
-                currentWinner = player;
-                if(player.getCombinationRate() == 6 || highestCardinPlayerHand == null){
-                    highestCardinPlayerHand = findHighestCardInPlayerHand(player, finalSuitIfFlush);
-                }
-            } else if (currentWinner.getCombinationRate() == player.getCombinationRate()) {
-                if (currentWinner.getHighCard().getNumber() < player.getHighCard().getNumber() &&
-                        (player.getCombinationRate() == 9 || player.getCombinationRate() == 5)) {
-                    currentWinner = player;
-                } else if((currentWinner.getHighCard().getNumber() == player.getHighCard().getNumber()) &&
-                        player.getCombinationRate() == 6) {
-                    Card tempHighestCardinPlayerHand = findHighestCardInPlayerHand(player, finalSuitIfFlush);
-                    if(highestCardinPlayerHand.getNumber() < tempHighestCardinPlayerHand.getNumber()){
-                        highestCardinPlayerHand = tempHighestCardinPlayerHand;
-                        currentWinner = player;
-                    }
-                }
-            }
+
+
+//            if (currentWinner == null || (currentWinner.getCombinationRate() < player.getCombinationRate())) {
+//                currentWinner = player;
+//                if (player.getCombinationRate() == 6 || highestCardinPlayerHand == null) {
+//                    highestCardinPlayerHand = findHighestCardInPlayerHand(player, finalSuitIfFlush);
+//                }
+//            } else if (currentWinner.getCombinationRate() == player.getCombinationRate()) {
+//                if (currentWinner.getHighCard().getNumber() < player.getHighCard().getNumber() &&
+//                        (player.getCombinationRate() == 9 || player.getCombinationRate() == 5)) {
+//                    currentWinner = player;
+//                } else if ((currentWinner.getHighCard().getNumber() == player.getHighCard().getNumber()) &&
+//                        player.getCombinationRate() == 6) {
+//                    Card tempHighestCardinPlayerHand = findHighestCardInPlayerHand(player, finalSuitIfFlush);
+//                    if (highestCardinPlayerHand.getNumber() < tempHighestCardinPlayerHand.getNumber()) {
+//                        highestCardinPlayerHand = tempHighestCardinPlayerHand;
+//                        currentWinner = player;
+//                    }
+//                }
+//            }
         }
-        winner = currentWinner;
+//        winner = currentWinner;
     }
 
-    private Card findHighestCardInPlayerHand(Player player,String finalSuit) {
-        Card [] cards = player.getCards();
-        Card cardToReturn = new Card(-1, finalSuit);
-        for (Card card : cards) {
-            if (card.getSuit().equals(cardToReturn.getSuit()) && cardToReturn.getNumber() < card.getNumber()) {
-                cardToReturn = card;
-            }
+//    private Card findHighestCardInPlayerHand(Player player, String finalSuit) {
+//        Card[] cards = player.getCards();
+//        Card cardToReturn = new Card(-1, finalSuit);
+//        for (Card card : cards) {
+//            if (card.getSuit().equals(cardToReturn.getSuit()) && cardToReturn.getNumber() < card.getNumber()) {
+//                cardToReturn = card;
+//            }
+//        }
+//        return cardToReturn;
+//    }
+
+    public void setHighCards(Player player) {
+        List<Card> currentCards = joinTableAndPlayerCards(player);
+        while (player.getCombinationCards().size() != 5) {
+            currentCards.sort(Comparator.comparing(Card::getNumber).reversed());
+            player.getCombinationCards().add(currentCards.get(0));
+            currentCards.remove(0);
         }
-        return cardToReturn;
+    }
+
+    public void getWinnerByHighCard(List<Player> players) {
+        List<Player> playersWithSameHighCard = new ArrayList<>();
+        List<Player> playersToRemove = new ArrayList<>();
+        int highCard = -1;
+        for (Player currentPlayer : players) {
+            if (currentPlayer.getCombinationCards().isEmpty()){
+                if (players.size() == 1) {
+                    winner = players.get(0);
+                } else {
+                    isSplit = true;
+                }
+                return;
+            }
+                if (highCard <= currentPlayer.getCombinationCards().get(0).getNumber()) {
+                    highCard = currentPlayer.getCombinationCards().get(0).getNumber();
+                    currentPlayer.getCombinationCards().remove(0);
+                    playersWithSameHighCard.add(currentPlayer);
+                } else {
+                    playersToRemove.add(currentPlayer);
+                }
+        }
+        players.removeAll(playersToRemove);
+        getWinnerByHighCard(playersWithSameHighCard);
     }
 }
 
+// Royal Flush - Win, =< 2 players - split
+// Straight Flush, Straight - combination.size() -1 , else - split
+
+// Flush - combination.size() -1, if x == x, repeat, if combination.isEmpty - split
+
+// Four of Kind - combination.get(0), if x == x, joinTableAndPlayerCards(player).remove(combination), highCard,
+// else - split
+
+// Full House - x = combination.stream().filter(count == 3 ), if x == x, pair, else - split
+
+// Three of Kind - combination.get(0), if x == x, while(combination != 5) combination.add(highCard), else - split
+
+// Two Pair - Comparator.compare(combination.getNumber()), combination.get(size -1). else combination.get(0), else - highCard
+
+// pair - combination.get(0), else highCard <= 3
+
+// highCard - combination.add(joinTableAndPlayerCards.compare) while combination.size != 5 ...DONE
