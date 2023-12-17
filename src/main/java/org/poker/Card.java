@@ -2,8 +2,7 @@ package org.poker;
 
 public class Card {
     private int number;
-    private String suit;
-    private boolean isVisible = false;
+    private final String suit;
 
     public Card(int number, String suit) {
         this.number = number;
@@ -20,18 +19,6 @@ public class Card {
 
     public String getSuit() {
         return suit;
-    }
-
-    public void setSuit(String suit) {
-        this.suit = suit;
-    }
-
-    public boolean isVisible() {
-        return isVisible;
-    }
-
-    public void setVisible(boolean visible) {
-        isVisible = visible;
     }
 
     @Override

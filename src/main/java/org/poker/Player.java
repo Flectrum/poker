@@ -6,8 +6,7 @@ import java.util.List;
 public class Player {
     private String name;
     private Card[] cards;
-    private Combination combination1;
-    private boolean isPlaying;
+    private Combination combination;
     private List<Card> combinationCards;
 
     public Player() {
@@ -30,13 +29,6 @@ public class Player {
     public void setCards(Card[] cards) {
         this.cards = cards;
     }
-    public boolean isPlaying() {
-        return isPlaying;
-    }
-
-    public void setPlaying(boolean playing) {
-        isPlaying = playing;
-    }
 
     public List<Card> getCombinationCards() {
         return combinationCards;
@@ -46,11 +38,11 @@ public class Player {
         this.combinationCards = combinationCards;
     }
 
-    public Combination getCombination1() {
-        return combination1;
+    public Combination getCombination() {
+        return combination;
     }
 
-    public void setCombination1(Combination combination1) {
-        this.combination1 = combination1;
+    public void setCombination(Combination combination) {
+        this.combination = combination;
     }
 }
