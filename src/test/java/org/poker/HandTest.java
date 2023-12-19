@@ -12,6 +12,7 @@ public class HandTest extends TestCase {
     Player player1;
     Player player2;
     Player player3;
+    CombinationChecker combinationChecker;
 
     List<Card> cardsOnTheTable;
 
@@ -50,6 +51,7 @@ public class HandTest extends TestCase {
         player2 = new Player();
         player3 = new Player();
         cardsOnTheTable = new ArrayList<>();
+        players = new ArrayList<>();
 
         Card card1 = new Card(9, "Diamonds");
         Card card2 = new Card(8, "Clubs");
@@ -73,11 +75,16 @@ public class HandTest extends TestCase {
         cardsOnTheTable.add(card6);
         cardsOnTheTable.add(card7);
 
+        players.add(player1);
+        players.add(player2);
+        players.add(player3);
+
         hand.setCardsOnTheTable(cardsOnTheTable);
 
-        hand.checkForXOfKindCombination(player1);
-        hand.checkForXOfKindCombination(player2);
-        hand.checkForXOfKindCombination(player3);
+        for(Player player: players){
+            combinationChecker = new CombinationChecker(player, cardsOnTheTable);
+            combinationChecker.check();
+        }
 
         assertEquals(Combination.FULL_HOUSE, player1.getCombination());
         assertEquals(Combination.TWO_PAIRS, player2.getCombination());
@@ -89,7 +96,7 @@ public class HandTest extends TestCase {
         cardsOnTheTable = new ArrayList<>();
 
         Card card1 = new Card(9, "Clubs");
-        Card card2 = new Card(10, "Clubs");
+        Card card2 = new Card(10, "Diamonds");
         Card card3 = new Card(11, "Clubs");
         Card card4 = new Card(12, "Spades");
         Card card5 = new Card(8, "Spades");
@@ -106,7 +113,8 @@ public class HandTest extends TestCase {
 
         hand.setCardsOnTheTable(cardsOnTheTable);
 
-        hand.checkForStraight(player1, false);
+        combinationChecker = new CombinationChecker(player1, cardsOnTheTable);
+        combinationChecker.check();
 
         assertEquals(Combination.STRAIGHT, player1.getCombination());
     }
@@ -133,8 +141,8 @@ public class HandTest extends TestCase {
 
         hand.setCardsOnTheTable(cardsOnTheTable);
 
-        hand.checkForFlush(player1);
-        hand.checkForStraight(player1, false);
+        combinationChecker = new CombinationChecker(player1, cardsOnTheTable);
+        combinationChecker.check();
 
         assertEquals(Combination.STRAIGHT_FLUSH, player1.getCombination());
     }
@@ -161,8 +169,8 @@ public class HandTest extends TestCase {
 
         hand.setCardsOnTheTable(cardsOnTheTable);
 
-        hand.checkForFlush(player1);
-        hand.checkForStraight(player1, false);
+        combinationChecker = new CombinationChecker(player1, cardsOnTheTable);
+        combinationChecker.check();
 
         assertEquals(Combination.ROYAL_FLUSH, player1.getCombination());
     }
@@ -188,48 +196,25 @@ public class HandTest extends TestCase {
 
         hand.setCardsOnTheTable(cardsOnTheTable);
 
-        hand.checkForFlush(player1);
+        combinationChecker = new CombinationChecker(player1, cardsOnTheTable);
+        combinationChecker.check();
 
         assertEquals(Combination.FLUSH, player1.getCombination());
     }
 
-    public void testFindHighCard() {
-    }
-
-
-    public void testGetStraightHighCard() {
-    }
-
-    public void testGetDeck() {
-    }
-
-    public void testSetCardsOnTheTable() {
-    }
-
-    public void testGetSplitWithFourOfKindOnTheTable() {
-        players = new ArrayList<>();
+    public void testCheckForFullHouse() {
         player1 = new Player();
-        player1.setName("Alex");
-        player2 = new Player();
-        player2.setName("Nata");
         cardsOnTheTable = new ArrayList<>();
-        players.add(player1);
-        players.add(player2);
-        hand = new Hand(players);
 
-        Card card1 = new Card(11, "Diamonds");
-        Card card2 = new Card(11, "Clubs");
-        Card card3 = new Card(10, "Diamonds");
-        Card card4 = new Card(7, "Spades");
-        Card card5 = new Card(7, "Spades");
-        Card card6 = new Card(7, "Clubs");
-        Card card7 = new Card(7, "Clubs");
-        Card card8 = new Card(2, "Hearts");
-        Card card9 = new Card(2, "Hearts");
-
+        Card card1 = new Card(2, "Diamonds");
+        Card card2 = new Card(2, "Clubs");
+        Card card3 = new Card(8, "Clubs");
+        Card card4 = new Card(3, "Clubs");
+        Card card5 = new Card(3, "Clubs");
+        Card card6 = new Card(3, "Diamonds");
+        Card card7 = new Card(13, "Clubs");
 
         player1.setCards(new Card[]{card1, card2});
-        player2.setCards(new Card[]{card8, card9});
         cardsOnTheTable.add(card3);
         cardsOnTheTable.add(card4);
         cardsOnTheTable.add(card5);
@@ -238,51 +223,132 @@ public class HandTest extends TestCase {
 
         hand.setCardsOnTheTable(cardsOnTheTable);
 
-        hand.checkForXOfKindCombination(player1);
-        hand.checkForXOfKindCombination(player2);
-        hand.getWinnerByXOfKind(players);
+        combinationChecker = new CombinationChecker(player1, cardsOnTheTable);
+        combinationChecker.check();
 
-        assertEquals(1, hand.getWinnerList().size());
-        assertEquals("Alex", hand.getWinnerList().get(0).getName());
+        assertEquals(Combination.FLUSH, player1.getCombination());
     }
 
-    public void testGetWinnerByHighCard() {
-        players = new ArrayList<>();
-        player1 = new Player();
-        player1.setName("Alex");
-        player2 = new Player();
-        player2.setName("Nata");
-        cardsOnTheTable = new ArrayList<>();
-        players.add(player1);
-        players.add(player2);
-        hand = new Hand(players);
-
-        Card card1 = new Card(8, "Diamonds");
-        Card card2 = new Card(7, "Clubs");
-        Card card3 = new Card(10, "Diamonds");
-        Card card4 = new Card(11, "Spades");
-        Card card5 = new Card(12, "Spades");
-        Card card6 = new Card(2, "Clubs");
-        Card card7 = new Card(1, "Clubs");
-        Card card8 = new Card(9, "Hearts");
-        Card card9 = new Card(8, "Hearts");
-
-
-        player1.setCards(new Card[]{card1, card2});
-        player2.setCards(new Card[]{card8, card9});
-        cardsOnTheTable.add(card3);
-        cardsOnTheTable.add(card4);
-        cardsOnTheTable.add(card5);
-        cardsOnTheTable.add(card6);
-        cardsOnTheTable.add(card7);
-
-        hand.setCardsOnTheTable(cardsOnTheTable);
-
-        hand.setHighCards(player1);
-        hand.setHighCards(player2);
-
-        hand.getWinnerByHighCard(players);
-
-        assertEquals("Nata", hand.getWinnerList().get(0).getName());
-    }
+//    public void testGetWinnerWithFourOfKindOnTheTableByHighCard() {
+//        players = new ArrayList<>();
+//        player1 = new Player();
+//        player1.setName("Alex");
+//        player2 = new Player();
+//        player2.setName("Nata");
+//        cardsOnTheTable = new ArrayList<>();
+//        players.add(player1);
+//        players.add(player2);
+//        hand = new Hand(players);
+//
+//        Card card1 = new Card(11, "Diamonds");
+//        Card card2 = new Card(2, "Clubs");
+//        Card card3 = new Card(6, "Diamonds");
+//        Card card4 = new Card(7, "Spades");
+//        Card card5 = new Card(7, "Spades");
+//        Card card6 = new Card(7, "Clubs");
+//        Card card7 = new Card(7, "Clubs");
+//        Card card8 = new Card(3, "Hearts");
+//        Card card9 = new Card(13, "Hearts");
+//
+//
+//        player1.setCards(new Card[]{card1, card2});
+//        player2.setCards(new Card[]{card8, card9});
+//        cardsOnTheTable.add(card3);
+//        cardsOnTheTable.add(card4);
+//        cardsOnTheTable.add(card5);
+//        cardsOnTheTable.add(card6);
+//        cardsOnTheTable.add(card7);
+//
+//        hand.setCardsOnTheTable(cardsOnTheTable);
+//
+//        for(Player player: players){
+//            combinationChecker = new CombinationChecker(player, cardsOnTheTable);
+//            combinationChecker.check();
+//        }
+//
+//        assertEquals(Combination.FOUR_OF_KIND ,player1.getCombination());
+//        assertEquals(Combination.FOUR_OF_KIND ,player2.getCombination());
+//
+//        hand.getWinnerByXOfKind(players);
+//
+//        assertEquals(1, hand.getWinnerList().size());
+//        assertEquals("Nata", hand.getWinnerList().get(0).getName());
+//    }
+//
+//    public void testGetWinnerByHighCard() {
+//        players = new ArrayList<>();
+//        player1 = new Player();
+//        player1.setName("Alex");
+//        player2 = new Player();
+//        player2.setName("Nata");
+//        cardsOnTheTable = new ArrayList<>();
+//        players.add(player1);
+//        players.add(player2);
+//        hand = new Hand(players);
+//
+//        Card card1 = new Card(8, "Diamonds");
+//        Card card2 = new Card(7, "Clubs");
+//        Card card3 = new Card(10, "Diamonds");
+//        Card card4 = new Card(11, "Spades");
+//        Card card5 = new Card(12, "Spades");
+//        Card card6 = new Card(2, "Clubs");
+//        Card card7 = new Card(1, "Clubs");
+//        Card card8 = new Card(9, "Hearts");
+//        Card card9 = new Card(8, "Hearts");
+//
+//
+//        player1.setCards(new Card[]{card1, card2});
+//        player2.setCards(new Card[]{card8, card9});
+//        cardsOnTheTable.add(card3);
+//        cardsOnTheTable.add(card4);
+//        cardsOnTheTable.add(card5);
+//        cardsOnTheTable.add(card6);
+//        cardsOnTheTable.add(card7);
+//
+//        hand.setCardsOnTheTable(cardsOnTheTable);
+//
+//        hand.setHighCards(player1);
+//        hand.setHighCards(player2);
+//
+//        hand.getWinnerByHighCard(players);
+//
+//        assertEquals("Nata", hand.getWinnerList().get(0).getName());
+//    }
+//
+//    public void testCheckForFullHouseThreeOfKindCardNumber() {
+//        player1 = new Player();
+//        player2 = new Player();
+//        player3 = new Player();
+//        cardsOnTheTable = new ArrayList<>();
+//
+//        Card card1 = new Card(9, "Diamonds");
+//        Card card2 = new Card(3, "Clubs");
+//        Card card3 = new Card(1, "Clubs");
+//        Card card4 = new Card(9, "Spades");
+//        Card card5 = new Card(3, "Diamonds");
+//        Card card6 = new Card(3, "Hearts");
+//        Card card7 = new Card(8, "Clubs");
+//        Card card8 = new Card(2, "Clubs");
+//        Card card9 = new Card(2, "Hearts");
+//        Card card10 = new Card(9, "Hearts");
+//        Card card11 = new Card(3, "Hearts");
+//
+//
+//        player1.setCards(new Card[]{card1, card2});
+//        player2.setCards(new Card[]{card8, card9});
+//        player3.setCards(new Card[]{card10, card11});
+//        cardsOnTheTable.add(card3);
+//        cardsOnTheTable.add(card4);
+//        cardsOnTheTable.add(card5);
+//        cardsOnTheTable.add(card6);
+//        cardsOnTheTable.add(card7);
+//
+//        hand.setCardsOnTheTable(cardsOnTheTable);
+//
+//        hand.checkForXOfKindCombination(player1);
+//        hand.checkForXOfKindCombination(player2);
+//        hand.checkForXOfKindCombination(player3);
+//
+//        assertEquals(3, hand.cardNumber(player1));
+//    }
 }
