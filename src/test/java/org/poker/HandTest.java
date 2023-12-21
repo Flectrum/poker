@@ -315,40 +315,115 @@ public class HandTest extends TestCase {
 //        assertEquals("Nata", hand.getWinnerList().get(0).getName());
 //    }
 //
-//    public void testCheckForFullHouseThreeOfKindCardNumber() {
-//        player1 = new Player();
-//        player2 = new Player();
-//        player3 = new Player();
-//        cardsOnTheTable = new ArrayList<>();
-//
-//        Card card1 = new Card(9, "Diamonds");
-//        Card card2 = new Card(3, "Clubs");
-//        Card card3 = new Card(1, "Clubs");
-//        Card card4 = new Card(9, "Spades");
-//        Card card5 = new Card(3, "Diamonds");
-//        Card card6 = new Card(3, "Hearts");
-//        Card card7 = new Card(8, "Clubs");
-//        Card card8 = new Card(2, "Clubs");
-//        Card card9 = new Card(2, "Hearts");
-//        Card card10 = new Card(9, "Hearts");
-//        Card card11 = new Card(3, "Hearts");
-//
-//
-//        player1.setCards(new Card[]{card1, card2});
-//        player2.setCards(new Card[]{card8, card9});
-//        player3.setCards(new Card[]{card10, card11});
-//        cardsOnTheTable.add(card3);
-//        cardsOnTheTable.add(card4);
-//        cardsOnTheTable.add(card5);
-//        cardsOnTheTable.add(card6);
-//        cardsOnTheTable.add(card7);
-//
-//        hand.setCardsOnTheTable(cardsOnTheTable);
-//
-//        hand.checkForXOfKindCombination(player1);
-//        hand.checkForXOfKindCombination(player2);
-//        hand.checkForXOfKindCombination(player3);
-//
-//        assertEquals(3, hand.cardNumber(player1));
-//    }
+    public void testCheckForFullHouseThreeOfKindCardNumber() {
+        player1 = new Player();
+        player2 = new Player();
+        player3 = new Player();
+        cardsOnTheTable = new ArrayList<>();
+
+        Card card1 = new Card(9, "Diamonds");
+        Card card2 = new Card(9, "Clubs");
+        Card card3 = new Card(3, "Clubs");
+        Card card4 = new Card(9, "Spades");
+        Card card5 = new Card(3, "Diamonds");
+        Card card6 = new Card(3, "Hearts");
+        Card card7 = new Card(4, "Clubs");
+        Card card8 = new Card(2, "Clubs");
+        Card card9 = new Card(2, "Hearts");
+        Card card10 = new Card(9, "Hearts");
+        Card card11 = new Card(3, "Hearts");
+
+
+        player1.setCards(new Card[]{card1, card2});
+        player2.setCards(new Card[]{card8, card9});
+        player3.setCards(new Card[]{card10, card11});
+        cardsOnTheTable.add(card3);
+        cardsOnTheTable.add(card4);
+        cardsOnTheTable.add(card5);
+        cardsOnTheTable.add(card6);
+        cardsOnTheTable.add(card7);
+
+        hand.setCardsOnTheTable(cardsOnTheTable);
+
+        CombinationChecker combinationChecker1 = new CombinationChecker(player1, cardsOnTheTable);
+        CombinationChecker combinationChecker2 = new CombinationChecker(player2, cardsOnTheTable);
+        CombinationChecker combinationChecker3 = new CombinationChecker(player3, cardsOnTheTable);
+
+        combinationChecker1.check();
+        combinationChecker2.check();
+        combinationChecker3.check();
+
+        assertEquals(Combination.FULL_HOUSE, player1.getCombination());
+        assertEquals(Combination.FULL_HOUSE, player2.getCombination());
+        assertEquals(Combination.FOUR_OF_KIND, player3.getCombination());
+
+        players.add(player1);
+        players.add(player2);
+        players.add(player3);
+
+        hand.getWinnerByXOfKind(players);
+
+        assertEquals(1, hand.getWinnerList().size());
+        assertEquals(player1, hand.getWinnerList().get(0));
+        assertEquals(Combination.FULL_HOUSE, hand.getWinnerList().get(0).getCombination());
+
+    }
+
+    public void testCorrectCheckForThreePairsOnTheTable() {
+        players = new ArrayList<>();
+        player1 = new Player();
+        player2 = new Player();
+        player3 = new Player();
+        cardsOnTheTable = new ArrayList<>();
+
+        Card card1 = new Card(9, "Diamonds");
+        Card card2 = new Card(9, "Clubs");
+
+        Card card3 = new Card(2, "Clubs");
+        Card card4 = new Card(2, "Spades");
+        Card card5 = new Card(1, "Diamonds");
+        Card card6 = new Card(1, "Hearts");
+        Card card7 = new Card(4, "Clubs");
+
+        Card card8 = new Card(4, "Clubs");
+        Card card9 = new Card(3, "Hearts");
+
+        Card card10 = new Card(8, "Hearts");
+        Card card11 = new Card(8, "Hearts");
+
+
+        player1.setCards(new Card[]{card1, card2});
+        player2.setCards(new Card[]{card8, card9});
+        player3.setCards(new Card[]{card10, card11});
+        cardsOnTheTable.add(card3);
+        cardsOnTheTable.add(card4);
+        cardsOnTheTable.add(card5);
+        cardsOnTheTable.add(card6);
+        cardsOnTheTable.add(card7);
+
+        hand.setCardsOnTheTable(cardsOnTheTable);
+
+        CombinationChecker combinationChecker1 = new CombinationChecker(player1, cardsOnTheTable);
+        CombinationChecker combinationChecker2 = new CombinationChecker(player2, cardsOnTheTable);
+        CombinationChecker combinationChecker3 = new CombinationChecker(player3, cardsOnTheTable);
+
+        combinationChecker1.check();
+        combinationChecker2.check();
+        combinationChecker3.check();
+
+        assertEquals(Combination.TWO_PAIRS, player1.getCombination());
+        assertEquals(Combination.TWO_PAIRS, player2.getCombination());
+        assertEquals(Combination.TWO_PAIRS, player3.getCombination());
+
+        players.add(player1);
+        players.add(player2);
+        players.add(player3);
+
+        hand.getWinnerByXOfKind(players);
+
+        assertEquals(1, hand.getWinnerList().size());
+        assertEquals(player1, hand.getWinnerList().get(0));
+        assertEquals(Combination.TWO_PAIRS, hand.getWinnerList().get(0).getCombination());
+
+    }
 }
