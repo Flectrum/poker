@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class CombinationChecker {
-
     private final Player player;
     private final List<Card> cardsOnTheTable;
 
@@ -29,7 +28,7 @@ public class CombinationChecker {
         if (isCombinationNull()) {
             player.setCombination(Combination.HIGH_CARD);
         }
-        if(player.getCombinationCards().size() > 5){
+        if (player.getCombinationCards().size() > 5) {
             correctCombination();
         }
         if (player.getCombinationCards().size() < 5) {
@@ -93,44 +92,44 @@ public class CombinationChecker {
     }
 
     public void correctCombination() {
-                int minNumberThreeOfKind = Integer.MAX_VALUE;
-                int minNumberPair = Integer.MAX_VALUE;
-                int threeOfKind = 0;
-                int pair = 0;
-                Map<Integer, Long> cardsMap = player.getCombinationCards().stream()
-                        .collect(Collectors.groupingBy(Card::getNumber, Collectors.counting()));
-                for (Map.Entry<Integer, Long> card : cardsMap.entrySet()) {
-                    if (card.getValue() == 3) {
-                        if (minNumberThreeOfKind > card.getKey()) {
-                            minNumberThreeOfKind = card.getKey();
-                        }
-                        threeOfKind++;
-                    } else {
-                        if (minNumberPair > card.getKey()) {
-                            minNumberPair = card.getKey();
-                        }
-                        pair++;
-                    }
-                    if(threeOfKind == 2){
-                        int finalMinNumberThreeOfKind = minNumberThreeOfKind;
-                        player.getCombinationCards().remove(
-                                player.getCombinationCards().stream()
-                                        .filter(c -> c.getNumber() == finalMinNumberThreeOfKind)
-                                        .findAny().orElseThrow());
-                    } else if (isCombinationEquals(Combination.FULL_HOUSE) && pair == 2 ||
-                    isCombinationEquals(Combination.TWO_PAIRS) && pair == 3){
-                        int finalMinNumberPair = minNumberPair;
-                        if(isCombinationEquals(Combination.FULL_HOUSE)) {
-                            player.getCombinationCards().remove(
-                                    player.getCombinationCards().stream()
-                                            .filter(c -> c.getNumber() == finalMinNumberPair).findFirst().orElseThrow());
-                        } else {
-                            player.getCombinationCards().removeAll(player.getCombinationCards().stream()
-                                    .filter(c -> c.getNumber() == finalMinNumberPair).toList());
-                        }
-                    }
+        int minNumberThreeOfKind = Integer.MAX_VALUE;
+        int minNumberPair = Integer.MAX_VALUE;
+        int threeOfKind = 0;
+        int pair = 0;
+        Map<Integer, Long> cardsMap = player.getCombinationCards().stream()
+                .collect(Collectors.groupingBy(Card::getNumber, Collectors.counting()));
+        for (Map.Entry<Integer, Long> card : cardsMap.entrySet()) {
+            if (card.getValue() == 3) {
+                if (minNumberThreeOfKind > card.getKey()) {
+                    minNumberThreeOfKind = card.getKey();
                 }
+                threeOfKind++;
+            } else {
+                if (minNumberPair > card.getKey()) {
+                    minNumberPair = card.getKey();
+                }
+                pair++;
+            }
+            if (threeOfKind == 2) {
+                int finalMinNumberThreeOfKind = minNumberThreeOfKind;
+                player.getCombinationCards().remove(
+                        player.getCombinationCards().stream()
+                                .filter(c -> c.getNumber() == finalMinNumberThreeOfKind)
+                                .findAny().orElseThrow());
+            } else if (isCombinationEquals(Combination.FULL_HOUSE) && pair == 2 ||
+                    isCombinationEquals(Combination.TWO_PAIRS) && pair == 3) {
+                int finalMinNumberPair = minNumberPair;
+                if (isCombinationEquals(Combination.FULL_HOUSE)) {
+                    player.getCombinationCards().remove(
+                            player.getCombinationCards().stream()
+                                    .filter(c -> c.getNumber() == finalMinNumberPair).findFirst().orElseThrow());
+                } else {
+                    player.getCombinationCards().removeAll(player.getCombinationCards().stream()
+                            .filter(c -> c.getNumber() == finalMinNumberPair).toList());
+                }
+            }
         }
+    }
 
     public List<Card> collectXOfKindCardsToList(List<Card> cards, int cardNumber) {
         return cards.stream().filter(a -> cardNumber == a.getNumber())
@@ -162,7 +161,7 @@ public class CombinationChecker {
                     || !isCombinationEquals(Combination.ROYAL_FLUSH)) {
                 player.setCombination(Combination.STRAIGHT);
             }
-            while (combination.size() != 5) {
+            while (!combination.isEmpty() && combination.size() != 5) {
                 combination.remove(combination.get(0));
             }
             player.setCombinationCards(combination);
@@ -171,6 +170,7 @@ public class CombinationChecker {
         if ((isCombinationNull() || (isCombinationEquals(Combination.FLUSH))) && !isAceEqualsZero) {
             currentCards.stream().filter(c -> c.getNumber() == 13).forEach(c -> c.setNumber(0));
             checkForStraight(true);
+            currentCards.stream().filter(c -> c.getNumber() == 0).forEach(c -> c.setNumber(13));
         }
     }
 
