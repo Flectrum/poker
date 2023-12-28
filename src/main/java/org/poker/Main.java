@@ -7,7 +7,7 @@ import java.util.Set;
 public class Main {
     public static void main(String[] args) {
 
-        for(int i = 0; i < 100; i++){
+        for(int i = 0; i < 1000; i++){
             Player player1 = new Player();
             player1.setName("Alex");
 

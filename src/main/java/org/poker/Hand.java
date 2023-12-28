@@ -8,8 +8,6 @@ public class Hand {
     private final Set<Player> players;
     private final Deck deck;
     private List<Card> cardsOnTheTable;
-
-    private Combination highestCombination;
     private boolean isSplit;
 
     private int highestCombinationRate;
@@ -21,7 +19,6 @@ public class Hand {
         cardsOnTheTable = new ArrayList<>();
         winnerList = new HashSet<>();
         isSplit = false;
-        highestCombination = Combination.HIGH_CARD;
     }
 
     public Deck getDeck() {
@@ -44,10 +41,6 @@ public class Hand {
         return winnerList;
     }
 
-    public Set<Player> getPlayers() {
-        return players;
-    }
-
     public void init() {
         for (Player player : players) {
             CombinationChecker combinationChecker = new CombinationChecker(player, cardsOnTheTable);
@@ -59,7 +52,6 @@ public class Hand {
 
                 } else if (tempCombinationRate > highestCombinationRate) {
                     highestCombinationRate = tempCombinationRate;
-                    highestCombination = player.getCombination();
                     winnerList = new HashSet<>();
                     winnerList.add(player);
                 }
@@ -182,7 +174,6 @@ public class Hand {
                     if (player.getCombination().equals(Combination.FULL_HOUSE)) {
                         if (entry.getKey() > highestCardNumber) {
                             highestCardNumber = entry.getKey();
-                            highestCombination = player.getCombination();
                             tempWinnerList = new HashSet<>();
                             tempWinnerList.add(player);
                         } else if (entry.getKey() == highestCardNumber) {
@@ -214,64 +205,48 @@ public class Hand {
                     } else if (player.getCombination().equals(Combination.TWO_PAIRS)) {
                         if (tempFirstPair == -1) {
                             tempFirstPair = entry.getKey();
+                            continue;
                         } else {
                             tempSecondPair = entry.getKey();
                         }
-                        if (tempFirstPair > tempSecondPair) {
-                            if (tempFirstPair > highestCardNumber) {
-                                highestCardNumber = tempFirstPair;
-                                tempWinnerList = new HashSet<>();
-                                tempWinnerList.add(player);
-                                if (tempSecondPair > secondHighestCardNumber) {
-                                    secondHighestCardNumber = tempSecondPair;
-                                }
-                            }
-                        } else if (tempSecondPair > tempFirstPair) {
-                            if (tempSecondPair > highestCardNumber) {
-                                highestCardNumber = tempSecondPair;
-                                tempWinnerList = new HashSet<>();
-                                tempWinnerList.add(player);
-                                if (tempFirstPair > secondHighestCardNumber) {
-                                    secondHighestCardNumber = tempFirstPair;
-                                }
+                        if (tempSecondPair > tempFirstPair) {
+                            int temp = tempFirstPair;
+                            tempFirstPair = tempSecondPair;
+                            tempSecondPair = temp;
+                        }
+                        if (tempFirstPair > highestCardNumber) {
+                            highestCardNumber = tempFirstPair;
+                            tempWinnerList = new HashSet<>();
+                            tempWinnerList.add(player);
+                            if (tempSecondPair > secondHighestCardNumber) {
+                                secondHighestCardNumber = tempSecondPair;
                             }
                         }
-                        if (tempFirstPair == highestCardNumber && tempSecondPair == secondHighestCardNumber){
+                        if (tempFirstPair == highestCardNumber && tempSecondPair > secondHighestCardNumber) {
+                            tempWinnerList = new HashSet<>();
+                            tempWinnerList.add(player);
+                            secondHighestCardNumber = tempSecondPair;
+                        }
+                        if (tempFirstPair == highestCardNumber && tempSecondPair == secondHighestCardNumber) {
                             tempWinnerList.add(player);
                         }
                         List<Card> cardsToRemove = player.getCombinationCards().stream()
                                 .filter(c -> c.getNumber() == entry.getKey()).toList();
                         player.getCombinationCards().removeAll(cardsToRemove);
                         hasSameCards = true;
-
-
-//                            if (entry.getKey() > highestCardNumber || entry.getKey() > secondHighestCardNumber) {
-//                                highestCardNumber = entry.getKey();
-//                                tempWinnerList = new HashSet<>();
-//                                tempWinnerList.add(player);
-//                            }
-//                            if (entry.getKey() == highestCardNumber) {
-//                                tempWinnerList.add(player);
-//                                List<Card> cardsToRemove = player.getCombinationCards().stream()
-//                                        .filter(c -> c.getNumber() == entry.getKey()).toList();
-//                                player.getCombinationCards().removeAll(cardsToRemove);
-//                                hasSameCards = true;
-//                            }
+                    } else if (player.getCombination().equals(Combination.PAIR)) {
+                        if (entry.getKey() > highestCardNumber) {
+                            highestCardNumber = entry.getKey();
+                            tempWinnerList = new HashSet<>();
+                            tempWinnerList.add(player);
                         }
-                    else
-                            if (entry.getKey() > highestCardNumber) {
-                                highestCardNumber = entry.getKey();
-                                tempWinnerList = new HashSet<>();
-                                tempWinnerList.add(player);
-                    }
-                    if (entry.getKey() == highestCardNumber) {
-                        tempWinnerList.add(player);
-                        List<Card> cardsToRemove = player.getCombinationCards().stream()
-                                .filter(c -> c.getNumber() == entry.getKey()).toList();
-                        player.getCombinationCards().removeAll(cardsToRemove);
-                        hasSameCards = true;
-//                    }
-//                        }
+                        if (entry.getKey() == highestCardNumber) {
+                            tempWinnerList.add(player);
+                            List<Card> cardsToRemove = player.getCombinationCards().stream()
+                                    .filter(c -> c.getNumber() == entry.getKey()).toList();
+                            player.getCombinationCards().removeAll(cardsToRemove);
+                            hasSameCards = true;
+                        }
                     }
                 }
             }
